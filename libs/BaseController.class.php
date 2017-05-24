@@ -8,7 +8,7 @@
  */
 abstract class BaseController {
   /**
-   * @var DbTable|Station $model
+   * @var DbTable|Station|Line $model
    */
   protected  $model;
   protected $respondStatus = 200;
@@ -17,5 +17,17 @@ abstract class BaseController {
     return $this->respondStatus;
   }
   abstract public function processRequest($method, $uriElement);
-  public function loadModel($modelName) {}
+
+  public function loadModel($modelName) {
+    if (!file_exists(ROOT_PATH . "/model/" . $modelName . ".php")) {
+      die("Controller file not found!<br>");
+    }
+    require_once ROOT_PATH . "/model/" . $modelName . ".php";
+    $this->model = new $modelName;
+  }
+
+  public function badRequestResponse() {
+    $this->respondStatus = 400;
+    return "Invalid request";
+  }
 }

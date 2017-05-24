@@ -73,7 +73,19 @@ class API {
      * @var BaseController $controllerObject
      */
     $controllerObject = new $controller();
+
+    /* Testing */
+    if ($this->uriElement[count($this->uriElement) - 1] == 'decode') {
+      array_pop($this->uriElement);
+      $response = $controllerObject->processRequest($this->method,$this->uriElement);
+      var_dump($response);
+      return '';
+    }
+    /* end testing */
+
     $response = $controllerObject->processRequest($this->method,$this->uriElement);
+    if ($response == false)
+      return $this->response("Function return false!", 400);
     $status = $controllerObject->getRespondStatus();
     return $this->response($response, $status);
   }

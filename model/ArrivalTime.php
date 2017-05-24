@@ -53,7 +53,7 @@ class ArrivalTime extends DbTable {
     $avgSpeed = $systemConfig->getFieldValueByKey('value', 'avgSpeed');
     $route = $line->getRoute($lineId);
     $stationCount = count($route);
-    $startStaion = $route[0];
+    $startStation = $route[0];
     $endStation = $route[$stationCount - 1];
     $distanceTimes = array();
     for ($i = 0; $i <= $stationCount - 2; $i++) { //there are stationCount-1 distances
@@ -75,7 +75,7 @@ class ArrivalTime extends DbTable {
     $prevTrainArrivalTime = 0;
     for ($i = 0; $i <= $trainCount / 2 - 1; $i++) {
       $arrivalTimeList[] = array(
-        'stationId' => $startStaion,
+        'stationId' => $startStation,
         'trainId' => $trainList[$i],
         'destStationId' => $endStation,
         'time' => $i == 0 ? $startTime - $waitTime : $prevTrainArrivalTime + $frequency + $waitTime
@@ -90,7 +90,7 @@ class ArrivalTime extends DbTable {
           $arrivalTimeList[] = array(
             'stationId' => $route[$j],
             'trainId' => $trainList[$i],
-            'destStationId' => ($j==$stationCount - 1) ? $startStaion : $endStation,
+            'destStationId' => ($j==$stationCount - 1) ? $startStation : $endStation,
             'time' => $prevStationArrivalTime + $distanceTimes[$j - 1] + $waitTime
           );
         }
@@ -100,7 +100,7 @@ class ArrivalTime extends DbTable {
           $arrivalTimeList[] = array(
             'stationId' => $route[$j],
             'trainId' => $trainList[$i],
-            'destStationId' => $j == 0 ? $endStation : $startStaion,
+            'destStationId' => $j == 0 ? $endStation : $startStation,
             'time' => $prevStationArrivalTime + $distanceTimes[$j] + $waitTime
           );
           $arrivalTime = end($arrivalTimeList)['time'];
@@ -114,7 +114,7 @@ class ArrivalTime extends DbTable {
       $arrivalTimeList[] = array(
         'stationId' => $endStation,
         'trainId' => $trainList[$i],
-        'destStationId' => $startStaion,
+        'destStationId' => $startStation,
         'time' => $i == $trainCount / 2 ? $startTime - $waitTime : $prevTrainArrivalTime + $frequency + $waitTime
       );
       $prevTrainArrivalTime = end($arrivalTimeList)['time']; //for next train
@@ -125,7 +125,7 @@ class ArrivalTime extends DbTable {
           $arrivalTimeList[] = array(
             'stationId' => $route[$j],
             'trainId' => $trainList[$i],
-            'destStationId' => $j == 0 ? $endStation : $startStaion,
+            'destStationId' => $j == 0 ? $endStation : $startStation,
             'time' => $prevStationArrivalTime + $distanceTimes[$j] + $waitTime
           );
           $arrivalTime = end($arrivalTimeList)['time'];
@@ -136,7 +136,7 @@ class ArrivalTime extends DbTable {
           $arrivalTimeList[] = array(
             'stationId' => $route[$j],
             'trainId' => $trainList[$i],
-            'destStationId' => ($j==$stationCount - 1) ? $startStaion : $endStation,
+            'destStationId' => ($j==$stationCount - 1) ? $startStation : $endStation,
             'time' => $prevStationArrivalTime + $distanceTimes[$j - 1] + $waitTime
           );
         }
@@ -180,12 +180,15 @@ class ArrivalTime extends DbTable {
     $station = new Station();
     $destStationList = $this->getDestStationIdList($stationId);
     $arrivalTimeInfo = array();
+    $i = 0;
     foreach ($destStationList as $destStationId) {
-      $stationName = $station->getFieldValueById('name', $destStationId);
-      $arrivalTimeInfo[$stationName]['firstTrain'] = $this->getFirstTrainArrivalTime($stationId, $destStationId);
-      $arrivalTimeInfo[$stationName]['lastTrain'] = $this->getLastTrainArrivalTime($stationId, $destStationId);
-      $arrivalTimeInfo[$stationName]['nextTrain'] = $this->getNextTrainArrivalTime($stationId, $destStationId);
+      $arrivalTimeInfo[$i]['destId'] = $destStationId;
+      $arrivalTimeInfo[$i]['destName'] = $station->getFieldValueById('name', $destStationId);
+      $arrivalTimeInfo[$i]['firstTrain'] = Util::roundMinute($this->getFirstTrainArrivalTime($stationId, $destStationId));
+      $arrivalTimeInfo[$i]['lastTrain'] = Util::roundMinute($this->getLastTrainArrivalTime($stationId, $destStationId));
+      $arrivalTimeInfo[$i++]['nextTrain'] = $this->getNextTrainArrivalTime($stationId, $destStationId);
     }
+    var_dump($arrivalTimeInfo);
     return $arrivalTimeInfo;
   }
 

@@ -21,4 +21,6 @@ class Distance extends DbTable {
       return $result['distance'];
     else return false;
   }
+
+
 }
