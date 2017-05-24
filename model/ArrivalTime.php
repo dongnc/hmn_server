@@ -188,7 +188,6 @@ class ArrivalTime extends DbTable {
       $arrivalTimeInfo[$i]['lastTrain'] = Util::roundMinute($this->getLastTrainArrivalTime($stationId, $destStationId));
       $arrivalTimeInfo[$i++]['nextTrain'] = $this->getNextTrainArrivalTime($stationId, $destStationId);
     }
-    var_dump($arrivalTimeInfo);
     return $arrivalTimeInfo;
   }
 

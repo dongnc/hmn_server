@@ -75,7 +75,7 @@ class API {
     $controllerObject = new $controller();
 
     /* Testing */
-    if ($this->uriElement[count($this->uriElement) - 1] == 'decode') {
+    if (array_key_exists(0,$this->uriElement) && $this->uriElement[count($this->uriElement) - 1] == 'decode') {
       array_pop($this->uriElement);
       $response = $controllerObject->processRequest($this->method,$this->uriElement);
       var_dump($response);
