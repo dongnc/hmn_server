@@ -15,7 +15,7 @@ class Station extends DbTable {
   }
 
   function getStationList() {
-    return $this->getList("SELECT id, code, name FROM " . $this->table . " ORDER BY name");
+    return $this->getList("SELECT id, code, name, shape, coords FROM " . $this->table . " ORDER BY name");
   }
 
   function getStationInfo($stationId) {
@@ -24,6 +24,5 @@ class Station extends DbTable {
     $stationInfo['line'] = $belongTo->getLines($stationId);
     return $stationInfo;
   }
-
 
 }

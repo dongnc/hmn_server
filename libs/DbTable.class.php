@@ -59,10 +59,8 @@ class DbTable extends Db {
     $this->updateById($data,$id);
   }
 
-  /**
-   * @return string
-   */
-  public function getTable() {
-    return $this->table;
+  function getMaxId() {
+    $result =  $this->getOne("SELECT MAX(id) AS maxid FROM " . $this->table);
+    return $result['maxid'];
   }
 }

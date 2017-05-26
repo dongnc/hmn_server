@@ -70,7 +70,7 @@ class Db {
       $sql .= "$key = " . $this->conn->quote($value) . ",";
     }
     // Vì sau vòng lặp biến $sql sẽ thừa một dấu , nên ta sẽ dùng hàm trim để xóa đi
-    echo 'UPDATE ' . $table . ' SET ' . trim($sql, ',') . ' WHERE ' . $where;
+    //echo 'UPDATE ' . $table . ' SET ' . trim($sql, ',') . ' WHERE ' . $where;
     $sql =  $this->conn->prepare('UPDATE ' . $table . ' SET ' . trim($sql, ',') . ' WHERE ' . $where);
     $sql->execute();
   }
