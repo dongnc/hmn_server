@@ -11,7 +11,10 @@ class TestController {
   public function processRequest() {
     /* Test code goes here */
     $graph = new Graph();
-    $graph->shortestPath(1, 132);
+    echo "shortestPath\n";
+    $graph->shortestPath(78, 110);
+    echo "leastTransfer\n";
+    $graph->leastTransfer(78, 110);
 
 
 

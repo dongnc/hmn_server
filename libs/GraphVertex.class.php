@@ -8,7 +8,33 @@
  */
 class GraphVertex {
   private $id;
-  private $weight;
+  private $distance;
+  /**
+   * @var boolean
+   */
+  private $isMutual;
+  private $line;
+
+  /**
+   * @return bool
+   */
+  public function isMutual() {
+    return $this->isMutual;
+  }
+
+  /**
+   * @return mixed
+   */
+  public function getLine() {
+    return $this->line;
+  }
+
+  /**
+   * @param mixed $line
+   */
+  public function setLine($line) {
+    $this->line = $line;
+  }
 
   /**
    * @return mixed
@@ -27,14 +53,14 @@ class GraphVertex {
   /**
    * @return mixed
    */
-  public function getWeight() {
-    return $this->weight;
+  public function getDistance() {
+    return $this->distance;
   }
 
   /**
-   * @param mixed $weight
+   * @param mixed $distance
    */
-  public function setWeight($weight) {
-    $this->weight = $weight;
+  public function setDistance($distance) {
+    $this->distance = $distance;
   }
 }

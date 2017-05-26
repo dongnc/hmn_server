@@ -17,38 +17,43 @@ class Graph {
     $station = new Station();
     $distance = new Distance();
     $distanceList = $distance->getDistanceList();
-    $this->adjList = array_fill(1, $station->getMaxId(),0);
+    $this->adjList = array_fill(1, $station->getMaxId(), 0);
     foreach ($distanceList as $row) {
-      $this->addEdge($row['stationId1'], $row['stationId2'], $row['distance'] );
+      $this->addEdge($row['stationId1'], $row['stationId2'], $row['distance']);
     }
     //print_r($this->adjList);
   }
 
   function addEdge($v1, $v2, $weight) {
-    $vertexTemp1= new GraphVertex();
+    $vertexTemp1 = new GraphVertex();
     $vertexTemp1->setId($v2);
-    $vertexTemp1->setWeight($weight);
+    $vertexTemp1->setDistance($weight);
     if (!is_array($this->adjList[$v1]))
       $this->adjList[$v1] = array();
-    array_push($this->adjList[$v1],$vertexTemp1);
+    array_push($this->adjList[$v1], $vertexTemp1);
     //also add to adj list of station v2
-    $vertexTemp2= new GraphVertex();
+    $vertexTemp2 = new GraphVertex();
     $vertexTemp2->setId($v1);
-    $vertexTemp2->setWeight($weight);
+    $vertexTemp2->setDistance($weight);
     if (!is_array($this->adjList[$v2]))
       $this->adjList[$v2] = array();
-    array_push($this->adjList[$v2],$vertexTemp2);
+    array_push($this->adjList[$v2], $vertexTemp2);
   }
 
   function shortestPath($startVertex, $endVertex) {
     $station = new Station();
     $maxId = $station->getMaxId();
-    $distances = array_fill(1, $maxId,999999);
-    $previous = array_fill(1, $maxId,-1);
-    $unvisited = array_fill(1, $maxId,1);
+    $distances = array_fill(1, $maxId, 999999);
+    $previous = array_fill(1, $maxId, -1);
+    $unvisited = array_fill(1, $maxId, 1);
     $distances[$startVertex] = 0;
 
-    while (!$this->isAllVisited($unvisited)) {
+    $whileCount = 0;
+    //while (!$this->isAllVisited($unvisited)) {
+    while ($unvisited[$endVertex] == 1) {
+      /*$endVertex is set as visited IFF its distance form $startVertex is min from all other distances
+      that means there is no other path which have distances < current distance
+      */
       $cur = $this->getMinValueIndex($distances, $unvisited);
       $unvisited[$cur] = 0;
       $curAdjList = $this->getVertexAdjList($cur);
@@ -56,14 +61,63 @@ class Graph {
         /**
          * @var GraphVertex $neighbor
          */
-        $testDistance = $distances[$cur] + $neighbor->getWeight();
+        $testDistance = $distances[$cur] + $neighbor->getDistance();
         if ($testDistance < $distances[$neighbor->getId()]) {
           $distances[$neighbor->getId()] = $testDistance;
           $previous[$neighbor->getId()] = $cur;
         }
       }
+      $whileCount++;
+      if ($whileCount > $maxId) return false;
     }
-    return ($this->generateRoute($startVertex, $endVertex, $previous));
+    echo "$whileCount loops\n";
+    print_r($this->generateRoute($startVertex, $endVertex, $previous));
+  }
+
+  function leastTransfer($startVertex, $endVertex) {
+    $station = new Station();
+    $maxId = $station->getMaxId();
+    $distances = array_fill(1, $maxId, 999999);
+    $lineCount = array_fill(1, $maxId, 999999);
+    $previous = array_fill(1, $maxId, -1);
+    $prePrevious = array_fill(1, $maxId, -1);
+    $unvisited = array_fill(1, $maxId, 1);
+    $distances[$startVertex] = 0;
+    $lineCount[$startVertex] = 1;
+
+    $whileCount = 0;
+    while (!$this->isAllVisited($unvisited)) {
+      /* Because we consider 2 conditions: distance and number of line, a visited vertex may be updated
+      with smaller distance. So we must consider all verties in graph
+      */
+      $cur = $this->getMinValueIndex($lineCount, $unvisited);
+      $unvisited[$cur] = 0;
+      $curAdjList = $this->getVertexAdjList($cur);
+      foreach ($curAdjList as $neighbor) {
+        /**
+         * @var GraphVertex $neighbor
+         */
+        $nbId = $neighbor->getId();
+        if ($previous[$cur] != -1 && $this->isLineChanged($previous[$cur], $nbId))
+          $testLineCount = $lineCount[$cur] + 1;
+        else $testLineCount = $lineCount[$cur];
+        $testDistance = $distances[$cur] + $neighbor->getDistance();
+
+        if ($testLineCount < $lineCount[$nbId] ||
+          ($testLineCount == $lineCount[$nbId] && $testDistance < $distances[$nbId])) {
+        //if ($testDistance < $distances[$nbId]) {
+          $lineCount[$nbId] = $testLineCount;
+          $distances[$nbId] = $testDistance;
+          $previous[$nbId] = $cur;
+        }
+      }
+      $whileCount++;
+      //print_r($this->arrayIndexToStationName($lineCount));
+      //if ($whileCount > $maxId) return false;
+      //if ($whileCount > 20) return false;
+    }
+    echo "$whileCount loops\n";
+    print_r($this->generateRoute($startVertex, $endVertex, $previous));
   }
 
   function getVertexAdjList($vertex) {
@@ -108,6 +162,27 @@ class Graph {
       $namedRoute[$index] = $station->getFieldValueById('name', $stationId);
     }
     return $namedRoute;
+  }
+
+  function isLineChanged($v1, $v2) {
+    $belongTo = new BelongTo();
+    $lineV1 = $belongTo->getLines($v1);
+    $lineV2 = $belongTo->getLines($v2);
+    foreach ($lineV1 as $line1) {
+      foreach ($lineV2 as $line2) {
+        if ($line1 == $line2) return false;
+      }
+    }
+    return true;
+  }
+
+  function arrayIndexToStationName($array) {
+    $namedArray = array();
+    $station = new Station();
+    foreach ($array as $id => $value) {
+      $namedArray[$station->getFieldValueByKey('name', $id)] = $value;
+    }
+    return $namedArray;
   }
 
 }
