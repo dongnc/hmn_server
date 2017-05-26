@@ -10,9 +10,8 @@
 class TestController {
   public function processRequest() {
     /* Test code goes here */
-
-
     $graph = new Graph();
+    $graph->shortestPath(1, 132);
 
 
 
