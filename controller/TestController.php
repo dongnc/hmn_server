@@ -12,9 +12,9 @@ class TestController {
     /* Test code goes here */
     $graph = new Graph();
     echo "shortestPath\n";
-    $graph->shortestPath(78, 110);
+    print_r($graph->shortestPath(1, 21));
     echo "leastTransfer\n";
-    $graph->leastTransfer(78, 110);
+    print_r($graph->leastTransfer(78, 110));
 
 
 

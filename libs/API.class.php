@@ -78,7 +78,7 @@ class API {
     if (array_key_exists(0,$this->uriElement) && $this->uriElement[count($this->uriElement) - 1] == 'decode') {
       array_pop($this->uriElement);
       $response = $controllerObject->processRequest($this->method,$this->uriElement);
-      var_dump($response);
+      print_r($response);
       return '';
     }
     /* end testing */

@@ -70,8 +70,14 @@ class Graph {
       $whileCount++;
       if ($whileCount > $maxId) return false;
     }
-    echo "$whileCount loops\n";
-    print_r($this->generateRoute($startVertex, $endVertex, $previous));
+    //echo "$whileCount loops\n";
+    $systemConfig = new SystemConfig();
+    $fpd = $systemConfig->getFieldValueByKey('value', 'farePerDistance');
+    $return = array();
+    $return['distance'] = $distances[$endVertex];
+    $return['fare'] = $fpd * $return['distance'];
+    $return['route'] = $this->analyseRoute($this->generateRoute($startVertex, $endVertex, $previous));
+    return $return;
   }
 
   function leastTransfer($startVertex, $endVertex) {
@@ -80,7 +86,6 @@ class Graph {
     $distances = array_fill(1, $maxId, 999999);
     $lineCount = array_fill(1, $maxId, 999999);
     $previous = array_fill(1, $maxId, -1);
-    $prePrevious = array_fill(1, $maxId, -1);
     $unvisited = array_fill(1, $maxId, 1);
     $distances[$startVertex] = 0;
     $lineCount[$startVertex] = 1;
@@ -105,19 +110,21 @@ class Graph {
 
         if ($testLineCount < $lineCount[$nbId] ||
           ($testLineCount == $lineCount[$nbId] && $testDistance < $distances[$nbId])) {
-        //if ($testDistance < $distances[$nbId]) {
           $lineCount[$nbId] = $testLineCount;
           $distances[$nbId] = $testDistance;
           $previous[$nbId] = $cur;
         }
       }
       $whileCount++;
-      //print_r($this->arrayIndexToStationName($lineCount));
-      //if ($whileCount > $maxId) return false;
-      //if ($whileCount > 20) return false;
     }
-    echo "$whileCount loops\n";
-    print_r($this->generateRoute($startVertex, $endVertex, $previous));
+    //echo "$whileCount loops\n";
+    $systemConfig = new SystemConfig();
+    $fpd = $systemConfig->getFieldValueByKey('value', 'farePerDistance');
+    $return = array();
+    $return['distance'] = $distances[$endVertex];
+    $return['fare'] = $fpd * $return['distance'];
+    $return['route'] = $this->analyseRoute($this->generateRoute($startVertex, $endVertex, $previous));
+    return $return;
   }
 
   function getVertexAdjList($vertex) {
@@ -156,14 +163,10 @@ class Graph {
       $prevVertex = $prevPrevVertex;
     }
     $route = array_reverse($route);
-    $namedRoute = array();
-    $station = new Station();
-    foreach ($route as $index => $stationId) {
-      $namedRoute[$index] = $station->getFieldValueById('name', $stationId);
-    }
-    return $namedRoute;
+    return $route;
   }
 
+  //route is: ...- v1 - v1.5 - v2 - .....
   function isLineChanged($v1, $v2) {
     $belongTo = new BelongTo();
     $lineV1 = $belongTo->getLines($v1);
@@ -183,6 +186,23 @@ class Graph {
       $namedArray[$station->getFieldValueByKey('name', $id)] = $value;
     }
     return $namedArray;
+  }
+
+  function analyseRoute($route) {
+    $imax = count($route)-3;
+    $analysedRoute = array();
+    $station = new Station();
+    foreach ($route as $index => $stationId) {
+      $analysedRoute[$index]['stationId'] = $stationId;
+      $analysedRoute[$index]['stationName'] = $station->getFieldValueById('name', $stationId);
+      $analysedRoute[$index]['isLineChanged'] = 0;
+    }
+    for ($i=0;$i<=$imax;$i++) {
+      if ($this->isLineChanged($route[$i], $route[$i+2])) {
+        $analysedRoute[$i+1]['isLineChanged'] = 1;
+      }
+    }
+    return $analysedRoute;
   }
 
 }
