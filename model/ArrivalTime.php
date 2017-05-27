@@ -216,21 +216,21 @@ class ArrivalTime extends DbTable {
     } else return false;
   }
 
-  function getNextTrainArrivalTime($startStationId, $destStationId) {
-    if ($startStationId == $destStationId) return false;
+  function getNextTrainArrivalTime($stationId, $destStationId) {
+    if ($stationId == $destStationId) return false;
     $result = $this->getOne("SELECT MIN(time) AS nextTime FROM " . $this->table . " WHERE stationId = "
-      . $startStationId . " AND destStationId = " . $destStationId . " AND time > CURRENT_TIME");
+      . $stationId . " AND destStationId = " . $destStationId . " AND time > CURRENT_TIME");
     if ($result != false && $result['nextTime']!='') {
       return $result['nextTime'];
     } else {
       $belongTo = new BelongTo();
-      $lineV1 = $belongTo->getLines($startStationId);
+      $lineV1 = $belongTo->getLines($stationId);
       $lineV2 = $belongTo->getLines($destStationId);
       $lineId = -1;
       foreach ($lineV1 as $line1) {
         foreach ($lineV2 as $line2) {
           if ($line1 == $line2) {
-            $lineId = $line1;
+            $lineId = $line1['lineId'];
             break 2;
           }
         }
@@ -238,18 +238,20 @@ class ArrivalTime extends DbTable {
       if ($lineId == -1) return false;
       $line = new Line();
       $route = $line->getRoute($lineId);
-      foreach ($route as $index => $stationId) {
-        if ($stationId == $startStationId) $startIndex = $index;
-        if ($stationId == $destStationId) $destIndex = $index;
+      foreach ($route as $index => $id) {
+        if ($id == $stationId) $startIndex = $index;
+        if ($id == $destStationId) $destIndex = $index;
       }
       if ($startIndex < $destIndex)
         $lineLastStationId = $route[count($route)-1];
       else $lineLastStationId = $route[0];
       $result = $this->getOne("SELECT MIN(time) AS nextTime FROM " . $this->table . " WHERE stationId = " .
-        $startStationId . " AND destStationId = " . $lineLastStationId . " AND time > CURRENT_TIME");
-      if ($result != false)
-        return $result['nextTime'];
-      else return false;
+        $stationId . " AND destStationId = " . $lineLastStationId . " AND time > CURRENT_TIME");
+      if ($result != false) {
+        if ($result['nextTime'] == NULL)
+          return $this->getFirstTrainArrivalTime($stationId, $destStationId);
+        else return $result['nextTime'];
+      } else return false;
     }
   }
 
