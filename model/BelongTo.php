@@ -14,7 +14,12 @@ class BelongTo extends DbTable {
   }
 
   function getLines($stationId) {
-    return $this->getList("SELECT lineId FROM " . $this->table . " WHERE stationId = " . $stationId);
+    $result = $this->getList("SELECT lineId FROM " . $this->table . " WHERE stationId = " . $stationId);
+    $return = array();
+    foreach ($result as $index => $value) {
+      $return[$index] = $value['lineId'];
+    }
+    return $return;
   }
 
   function getNonMutualStationLine($stationId) {

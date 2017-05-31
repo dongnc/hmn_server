@@ -19,7 +19,7 @@ class Station extends DbTable {
   }
 
   function getStationInfo($stationId) {
-    $stationInfo = $this->getOne("SELECT name, isMutual FROM " . $this->table . " WHERE id = " . $stationId);
+    $stationInfo = $this->getOne("SELECT code, name, isMutual FROM " . $this->table . " WHERE id = " . $stationId);
     $belongTo = new BelongTo();
     $stationInfo['line'] = $belongTo->getLines($stationId);
     return $stationInfo;

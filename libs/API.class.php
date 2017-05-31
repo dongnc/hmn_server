@@ -58,7 +58,6 @@ class API {
     }
   }
 
-
   public function processAPI() {
     $controller = ucfirst(rtrim($this->mainEndpoint,"s")) . 'Controller';
     //echo 'controller = ' . $controller . '<br>';

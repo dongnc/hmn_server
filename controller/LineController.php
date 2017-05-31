@@ -34,11 +34,6 @@ class LineController extends BaseController {
                 case "route":
                   return $this->model->getRoute($lineId);
 
-                case "test":
-                  $time = 31;
-                  echo Util::roundMinute($time);
-                  break;
-
                 default:
                   return $this->badRequestResponse();
               }

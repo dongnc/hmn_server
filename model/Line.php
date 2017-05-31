@@ -15,7 +15,7 @@ class Line extends DbTable {
   }
 
   function getLineList() {
-    return $this->getList("SELECT id, code, name FROM " . $this->table . " ORDER BY id");
+    return $this->getList("SELECT id, code, name, coords1, coords2 FROM " . $this->table . " ORDER BY id");
   }
 
   function getLineInfo($lineId) {
@@ -23,7 +23,14 @@ class Line extends DbTable {
     if ($result != false) {
       $result['distance'] = $this->getLineDistance($lineId);
       $result['totalTime'] = $this->getLineTime($lineId);
-      $result['route'] = $this->getRoute($lineId);
+      $station = new Station();
+      $idRoute = $this->getRoute($lineId);
+      $namedIdRoute = array();
+      foreach ($idRoute as $index => $value) {
+        $namedIdRoute[$index]['id'] = $value;
+        $namedIdRoute[$index]['name'] = $station->getFieldValueById('name', $value);
+      }
+      $result['route'] = $namedIdRoute;
     }
     return $result;
   }

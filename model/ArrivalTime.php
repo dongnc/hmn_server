@@ -230,7 +230,7 @@ class ArrivalTime extends DbTable {
       foreach ($lineV1 as $line1) {
         foreach ($lineV2 as $line2) {
           if ($line1 == $line2) {
-            $lineId = $line1['lineId'];
+            $lineId = $line1;
             break 2;
           }
         }

@@ -10,12 +10,12 @@
 class TestController {
   public function processRequest() {
     /* Test code goes here */
-    $graph = new Graph();
-    echo "shortestPath\n";
-    print_r($graph->shortestPath(1, 21));
-    echo "leastTransfer\n";
-    print_r($graph->leastTransfer(78, 110));
-
+    /* $line = new Line();
+     $list = $line->getLineList();
+     foreach ($list as $line) {
+       echo "<area href=\"#\" data=\"line_" . $line['id'] . "\" shape=\"circle\" coords=\" " . $line['coords1'] . "\"/>"  . PHP_EOL ;
+       echo "<area href=\"#\" data=\"line_" . $line['id'] . "\" shape=\"circle\" coords=\" " . $line['coords2'] . "\"/>" . PHP_EOL;
+     }*/
 
 
     /*Test code end here */
