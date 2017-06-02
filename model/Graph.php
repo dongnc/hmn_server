@@ -73,10 +73,13 @@ class Graph {
     //echo "$whileCount loops\n";
     $systemConfig = new SystemConfig();
     $fpd = $systemConfig->getFieldValueByKey('value', 'farePerDistance');
+    $speed = $systemConfig->getFieldValueByKey('value', 'avgSpeed');
+    $route = $this->analyseRoute($this->generateRoute($startVertex, $endVertex, $previous));
     $return = array();
     $return['distance'] = $distances[$endVertex];
+    $return['time'] = gmdate("H:i:s",$distances[$endVertex] / $speed * 3600 + count($route)*30);
     $return['fare'] = $fpd * $return['distance'];
-    $return['route'] = $this->analyseRoute($this->generateRoute($startVertex, $endVertex, $previous));
+    $return['route'] = $route;
     return $return;
   }
 
@@ -108,22 +111,46 @@ class Graph {
         else $testLineCount = $lineCount[$cur];
         $testDistance = $distances[$cur] + $neighbor->getDistance();
 
-        if ($testLineCount < $lineCount[$nbId] ||
-          ($testLineCount == $lineCount[$nbId] && $testDistance < $distances[$nbId])) {
+        //TODO fix http://server.hmn/nav/77/114/leasttransfer/
+        //right distance, wrong route
+
+        $test = 0;
+        /*if (($testLineCount == $lineCount[$nbId]) && ($testDistance < $distances[$nbId])) {
+          echo "before: prevCur = $previous[$cur] cur=$cur prevNb=$previous[$nbId] nb=$nbId lineCountNb=$lineCount[$nbId] disNb=$distances[$nbId] \n";
+          $test = 1;
+        }
+        if ($cur == 112 || $cur == 163) {
+          echo "before: prevCur = $previous[$cur] cur=$cur prevNb=$previous[$nbId] nb=$nbId lineCountNb=$lineCount[$nbId] disNb=$distances[$nbId] \n";
+          $test = 1;
+        }*/
+
+        /*if ($testLineCount < $lineCount[$nbId] ||
+          ($testLineCount == $lineCount[$nbId] && $testDistance < $distances[$nbId])) {*/
+        if ($testLineCount < $lineCount[$nbId]) {
+
           $lineCount[$nbId] = $testLineCount;
           $distances[$nbId] = $testDistance;
           $previous[$nbId] = $cur;
+
         }
+
+        /*if ($test == 1) {
+          echo "after:  prevCur = $previous[$cur] cur=$cur prevNb=$previous[$nbId] nb=$nbId lineCountNb=$lineCount[$nbId] disNb=$distances[$nbId] \n";
+        }*/
+
       }
       $whileCount++;
     }
     //echo "$whileCount loops\n";
     $systemConfig = new SystemConfig();
     $fpd = $systemConfig->getFieldValueByKey('value', 'farePerDistance');
+    $speed = $systemConfig->getFieldValueByKey('value', 'avgSpeed');
+    $route = $this->analyseRoute($this->generateRoute($startVertex, $endVertex, $previous));
     $return = array();
     $return['distance'] = $distances[$endVertex];
+    $return['time'] = gmdate("H:i:s",$distances[$endVertex] / $speed * 3600 + count($route)*30);
     $return['fare'] = $fpd * $return['distance'];
-    $return['route'] = $this->analyseRoute($this->generateRoute($startVertex, $endVertex, $previous));
+    $return['route'] = $route;
     return $return;
   }
 
@@ -166,7 +193,7 @@ class Graph {
     return $route;
   }
 
-  //route is: ...- v1 - v1.5 - v2 - .....
+//route is: ...- v1 - v1.5 - v2 - .....
   function isLineChanged($v1, $v2) {
     $belongTo = new BelongTo();
     $lineV1 = $belongTo->getLines($v1);
@@ -189,17 +216,22 @@ class Graph {
   }
 
   function analyseRoute($route) {
-    $imax = count($route)-3;
+    $imax = count($route) - 3;
     $analysedRoute = array();
     $station = new Station();
+    $line = new Line();
     foreach ($route as $index => $stationId) {
       $analysedRoute[$index]['stationId'] = $stationId;
       $analysedRoute[$index]['stationName'] = $station->getFieldValueById('name', $stationId);
       $analysedRoute[$index]['isLineChanged'] = 0;
+      if ($index <= count($route) -2) {
+        $lineEnd = $line->getLineEnd($stationId, $route[$index+1]);
+        $analysedRoute[$index]['toward'] = $station->getFieldValueById('name', $lineEnd);;
+      }
     }
-    for ($i=0;$i<=$imax;$i++) {
-      if ($this->isLineChanged($route[$i], $route[$i+2])) {
-        $analysedRoute[$i+1]['isLineChanged'] = 1;
+    for ($i = 0; $i <= $imax; $i++) {
+      if ($this->isLineChanged($route[$i], $route[$i + 2])) {
+        $analysedRoute[$i + 1]['isLineChanged'] = 1;
       }
     }
     return $analysedRoute;

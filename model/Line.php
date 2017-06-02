@@ -21,6 +21,7 @@ class Line extends DbTable {
   function getLineInfo($lineId) {
     $result =  $this->getOne("SELECT code, name, startTime, endTime, waitTime, frequency, trainCount FROM " . $this->table . " WHERE id = " . $lineId);
     if ($result != false) {
+      $result['frequency'] = Util::roundMinute($result['frequency']);
       $result['distance'] = $this->getLineDistance($lineId);
       $result['totalTime'] = $this->getLineTime($lineId);
       $station = new Station();
@@ -71,5 +72,31 @@ class Line extends DbTable {
     $distanceList = $this->getLineDistanceList($lineId);
     $lineTime =  array_sum($distanceList) * 3600 / $avgSpeed + (count($distanceList)-1)*$waitTime;
     return Util::roundMinute($lineTime);
+  }
+
+  function getLineEnd($stationId, $destStationId) {
+    $belongTo = new BelongTo();
+    $lineV1 = $belongTo->getLines($stationId);
+    $lineV2 = $belongTo->getLines($destStationId);
+    $lineId = -1;
+    foreach ($lineV1 as $line1) {
+      foreach ($lineV2 as $line2) {
+        if ($line1 == $line2) {
+          $lineId = $line1;
+          break 2;
+        }
+      }
+    }
+    if ($lineId == -1) return false;
+    $line = new Line();
+    $route = $line->getRoute($lineId);
+    foreach ($route as $index => $id) {
+      if ($id == $stationId) $startIndex = $index;
+      if ($id == $destStationId) $destIndex = $index;
+    }
+    if ($startIndex < $destIndex)
+      $lineLastStationId = $route[count($route)-1];
+    else $lineLastStationId = $route[0];
+    return $lineLastStationId;
   }
 }

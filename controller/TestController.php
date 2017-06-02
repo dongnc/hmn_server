@@ -17,6 +17,8 @@ class TestController {
        echo "<area href=\"#\" data=\"line_" . $line['id'] . "\" shape=\"circle\" coords=\" " . $line['coords2'] . "\"/>" . PHP_EOL;
      }*/
 
+    $graph = new Graph();
+    var_dump($graph->isLineChanged(163,112));
 
     /*Test code end here */
     return '';
