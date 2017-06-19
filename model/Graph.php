@@ -149,7 +149,7 @@ class Graph {
     $return = array();
     $return['distance'] = $distances[$endVertex];
     $return['time'] = gmdate("H:i:s",$distances[$endVertex] / $speed * 3600 + count($route)*30);
-    $return['fare'] = $fpd * $return['distance'];
+    $return['fare'] = $fpd * $this->shortestPath($startVertex, $endVertex)['distance'];
     $return['route'] = $route;
     return $return;
   }
